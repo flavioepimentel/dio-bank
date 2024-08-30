@@ -1,3 +1,7 @@
+import json
+import datetime
+
+
 menu = """
 
 [d] Depositar
@@ -7,11 +11,22 @@ menu = """
 
 => """
 
+
 saldo = 0
 limite = 500
-extrato = ""
 numero_saques = 0
 LIMITE_SAQUES = 3
+
+
+def write_operation(json_string):
+    with open("data.json", "w") as file:
+        file.write(json_string)
+
+
+def read_operation(json_string):
+    with open("data.json", "r") as file:
+        file.read(json_string)
+
 
 while True:
 
@@ -22,6 +37,15 @@ while True:
 
         if valor > 0:
             saldo += valor
+            ct = datetime.datetime.now()
+
+            data = {
+                "timestamp": ct,
+                "operation": "John",
+                "value": 30,
+                "city": "New York"
+            }
+
             extrato += f"Depósito: R$ {valor:.2f}\n"
 
         else:
@@ -47,6 +71,15 @@ while True:
 
         elif valor > 0:
             saldo -= valor
+            ct = datetime.datetime.now()
+
+            data = {
+                "timestamp": ct,
+                "operation": "John",
+                "value": 30,
+                "city": "New York"
+            }
+
             extrato += f"Saque: R$ {valor:.2f}\n"
             numero_saques += 1
 
