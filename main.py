@@ -19,7 +19,6 @@ def logged_menu_cotroller() -> str:
 
     if opcao == "d":
         valor = float(input("Informe o valor do depósito: "))
-
         if valor > 0:
             deposit_operation(valor)
         else:

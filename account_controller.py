@@ -23,19 +23,18 @@ def saque_validation(valor_saque: float, saldo: float) -> None:
     excedeu_limite = valor_saque > LIMITE_VALOR_SAQUE
     excedeu_saques = CONTAGEM_SAQUES_DIA >= LIMITE_NUMERO_SAQUES
     if excedeu_saldo:
-        print("Operação falhou! Você não tem saldo suficiente.")
+        print("\nOperação falhou! Você não tem saldo suficiente.")
     elif excedeu_limite:
-        print("Operação falhou! O valor do saque excede o limite.")
+        print("\nOperação falhou! O valor do saque excede o limite.")
     elif excedeu_saques:
-        print(
-            """\nOperação falhou! Você excedeu o número máximo de saques diários. 
+        print("""\nOperação falhou! Você excedeu o número máximo de saques diários. 
 Tente novamente amanhã.""")
         print("Saques realizados: ", CONTAGEM_SAQUES_DIA)
 
     elif valor_saque > 0:
         withdrawal_operation(valor_saque)
     else:
-        print("Operação falhou! O valor informado é inválido.")
+        print("\nOperação falhou! O valor informado é inválido.")
 
 
 # "2024-09-02 23:00:44.480308"
