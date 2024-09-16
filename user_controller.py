@@ -1,77 +1,91 @@
 import json
 import datetime
 from connection import write_operation, deserialize
-from account_controller import account_creation
 
 
-def access_validation(cpf: str, email: str, password: str) -> bool:
+def access_validation(cpf: str, email: str, password: str, *user_data) -> bool:
     """
     Retorna um valor booleano para a verificação da existencia das 
     primary key e password
     """
-    data: list = deserialize(USER_DATA)
-    if password in data and (cpf in data or email in data):
+    user_data: list = deserialize(user_data)
+    if password in user_data and (cpf in user_data or email in user_data):
         return True
-    else:
+    return False
+
+
+def password_validation(password: str, password_conf: str):
+    if password == password_conf:
+        return True
+    return False
+
+
+def cpf_validation(cpf: str) -> bool:
+    if len(cpf) == 11:
+        return True
+    return False
+
+
+def load_user(cpf, ACCOUNT_DATA, USER_DATA):
+    user_data: list = deserialize(USER_DATA)
+    account_data: list = deserialize(ACCOUNT_DATA)
+    user_data = [i for i in user_data if i['cpf'] == cpf]
+    account_data = [i for i in account_data if i['cpf'] == cpf]
+    user_data['accounts'] = account_data
+    return user_data
+
+
+def birthday_validation(birth_date: str) -> bool:
+    try:
+        date = datetime.datetime.strptime(birth_date, '%d/%m/%Y')
+        return age_validation(date)
+    except ValueError:
+        print('Data de nascimento está em um formato fora do padrão.')
         return False
 
 
-def new_user_validation(user, cpf, email) -> bool:
-    """
-    Retorna um valor booleano para a verificação da existencia das 
-    primary key
-    """
-    data: list = deserialize(USER_DATA)
-    if user in data and cpf in data and email in data:
+def age_validation(birth_date: datetime) -> bool:
+    if datetime.datetime.now() - birth_date > datetime.timedelta(days=(16*365)):
         return True
-    else:
-        return False
+    print('Usuário possui menos de 16 anos.')
+    return False
 
 
-def user_create(user, cpf, email, birth_date,
-                address, contact_number, password) -> None:
+def new_user_validation(cpf: str, email: str, user_data: str) -> bool:
+    """
+    Retorna um valor booleano para a verificação de novo usuário, 
+    se as chaves primárias existirem, não é um novo usuário (false)
+    """
+    data: list = deserialize(user_data)
+    if cpf not in data and email not in data:
+        return True
+    return False
+
+
+def check_account_number(account_data, account_select):
+    """
+    Função checa a existência de mais de uma conta corrente utilizada
+    pelo mesmo usuário.
+
+    """
+    if len(account_data) > 1:
+        return account_select(account_data)
+    return account_data['account_number']
+
+
+def user_create(user: str, cpf: str, email: str, contact_number: str,
+                password: str, birth_date: str, address: str, user_data) -> None:
     """
     Recebe dados para cadastro de novo usuário
     """
-    global USER_DATA
-    write_operation({
-        "timestamp": datetime.datetime.now(),
-        "user": user,
-        "cpf": cpf,
-        "email": email,
-        "birth_date": birth_date,
-        "address": address,
-        "contact_number": contact_number,
-        "password": password,
-    }, USER_DATA)
-
-
-def generate_new_account_number() -> int:
-    """
-    Busca a última conta registrada e devolve um valor 
-    válido de número de conta
-    """
-    global ACCOUNT_DATA
-    data: list = deserialize(ACCOUNT_DATA)
-    last_account: int = 0
-    for indicie, valor in enumerate(data):
-        if valor["account_number"] > last_account:
-            last_account = valor["account_number"]
-    return last_account + 1
-
-
-def user_create(user: str, cpf: str, email: str,
-                password: str, account_number: str, agencie_number: str) -> None:
-    """
-    Recebe dados para cadastro de novo usuário
-    """
-    global USER_DATA
-    write_operation({
-        "timestamp": datetime.datetime.now(),
-        "user": user,
-        "cpf": cpf,
-        "email": email,
-        "account_number": account_number,
-        "agencie_number": agencie_number,
-        "password": password,
-    }, USER_DATA)
+    if new_user_validation(cpf, email, user_data):
+        write_operation({
+            "timestamp": datetime.datetime.now(),
+            "user": user,
+            "cpf": cpf,
+            "email": email,
+            "contact_number": contact_number,
+            "birth_date": birth_date,
+            "address": address,
+            "password": password,
+        }, user_data)

@@ -1,78 +1,103 @@
 
 import json
 import datetime
-from main import SALDO_SESSION, LIMITE_VALOR_SAQUE, CONTAGEM_SAQUES_DIA, LIMITE_NUMERO_SAQUES
-from connection import write_operation, deserialize, OPERATION_DATA
-from user_controller import access_validation, new_user_validation
+from connection import write_operation, deserialize
 
 
-def account_validation():
-    pass
+def generate_new_account_number() -> int:
+    """
+    Busca a última conta registrada e devolve um valor 
+    válido de número de conta
+    """
+    global ACCOUNT_DATA
+    data: list = deserialize(ACCOUNT_DATA)
+    last_account: int = 0
+    for indicie, valor in enumerate(data):
+        if valor["account_number"] > last_account:
+            last_account = valor["account_number"]
+    return last_account + 1
 
 
-def account_creation(user, cpf, email, birth_date, address, contact_number, password):
-    if new_user_validation(user, cpf, email):
-        pass
-    elif access_validation(cpf, email, password):
-        pass
-    return write_operation({})
+def account_create(user: str, cpf: str, email: str) -> None:
+    account_number: int = generate_new_account_number()
+    write_operation({
+        "timestamp": datetime.datetime.now(),
+        "user": user,
+        "cpf": cpf,
+        "email": email,
+        "account_number": account_number,
+        "agencie_number": "0001",
+        "balance": 0.0
+    })
 
 
-def saque_validation(valor_saque: float, saldo: float) -> None:
-    excedeu_saldo = valor_saque > saldo
-    excedeu_limite = valor_saque > LIMITE_VALOR_SAQUE
-    excedeu_saques = CONTAGEM_SAQUES_DIA >= LIMITE_NUMERO_SAQUES
+def withdrawal_validation(withdrawal_value: float, balance: float, limite_valor_saque: float, contagem_saques_dia: int, limite_numero_saques: int) -> bool:
+    excedeu_saldo = withdrawal_value > balance
+    excedeu_limite = withdrawal_value > limite_valor_saque
+    excedeu_saques = contagem_saques_dia >= limite_numero_saques
     if excedeu_saldo:
         print("\nOperação falhou! Você não tem saldo suficiente.")
+        return False
     elif excedeu_limite:
         print("\nOperação falhou! O valor do saque excede o limite.")
+        return False
     elif excedeu_saques:
         print("""\nOperação falhou! Você excedeu o número máximo de saques diários. 
 Tente novamente amanhã.""")
-        print("Saques realizados: ", CONTAGEM_SAQUES_DIA)
-
-    elif valor_saque > 0:
-        withdrawal_operation(valor_saque)
+        print("Saques realizados: ", contagem_saques_dia)
+        return False
+    elif withdrawal_value > 0:
+        return True
     else:
         print("\nOperação falhou! O valor informado é inválido.")
+        return False
 
 
 # "2024-09-02 23:00:44.480308"
-def deposit_operation(value: float) -> None:
+def deposit_operation(*, value: float, account_number: int, cpf: str, email: str, operation_data, limite_valor_saque: float, contagem_saques_dia: int, limite_numero_saques: int) -> None:
     """
     Realiza a operação de soma na variável global SALDO_SESSION 
     e a escrita da operação no extrato
     """
-    global SALDO_SESSION, OPERATION_DATA
-    SALDO_SESSION += value
     write_operation({
         "timestamp": datetime.datetime.now(),
+        "cpf:": cpf,
+        "email": email,
+        "account_number": account_number,
         "operation": "Deposito",
         "value": value,
-        "city": "New York"
-    }, OPERATION_DATA)
+        "location": "New York"
+    }, operation_data, limite_valor_saque, contagem_saques_dia,
+    limite_numero_saques)
 
 
-def withdrawal_operation(value: float) -> None:
+def withdrawal_operation(*, withdrawal_value: float, balance,
+                         account_number, cpf, email) -> None:
     """
     Realiza a operação de subtração na variável global SALDO_SESSION e 
     a escrita da operação no extrato
     """
     global SALDO_SESSION, OPERATION_DATA
-    SALDO_SESSION -= value
-    write_operation({
-        "timestamp": datetime.datetime.now(),
-        "operation": "Saque",
-        "value": value,
-        "city": "New York"
-    }, OPERATION_DATA)
+    SALDO_SESSION -= withdrawal_value
+    if withdrawal_validation(withdrawal_value, balance):
+        write_operation({
+            "timestamp": datetime.datetime.now(),
+            "cpf:": cpf,
+            "email": email,
+            "account_number": account_number,
+            "operation": "Saque",
+            "value": withdrawal_value,
+            "location": "New York"
+        }, OPERATION_DATA)
 
 
-def load_bank_balance() -> float:
+def load_bank_balance(cpf: str, account_number, bank_statement) -> float:
     """
-    Calcula o saldo com base no extrato da conta
+    Carrega saldo do usuário, calculando o saldo com base no extrato da conta
     """
-    bank_statement: object | list = deserialize()
+    bank_statement = [i for i in bank_statement if i["cpf:"]
+                      == cpf and i["account_number"] == account_number]
+
     saldo: float = 0.0
 
     for i, v in enumerate(bank_statement):
