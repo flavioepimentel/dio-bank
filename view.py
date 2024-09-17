@@ -24,14 +24,16 @@ def new_user_form() -> dict:
     user = str(input("Nome completo: ")).upper().strip()
     # capturar apenas os números, validar se já existe, validar se possui 11 dígitos
     cpf = str(input("CPF: ")).replace('.', '').replace('-', '').strip()
-    email = str(input("E-mail: ")).lower().strip()
+    email = str(input("E-mail: ")).lower().replace(' ', '')
     # válidar se >= 16 anos e <= 150 anos
     print('"Data de Nascimento: ')
     birth_date = str(input("Exemplo -> 20/01/1995: ")).strip()
     address = str(input("Endereço: ")).upper().strip()
-    contact_number = str(input("Número para contato: ")).strip()
-    password = str(input("Senha: ")).strip()
-    password_conf = str(input("Confirme a sua senha: ")).strip()
+    contact_number = str(input("Número para contato: ")).strip().replace(
+        '-', '').replace('(', '').replace(')', '').replace(' ', '')
+    password = str(input("Senha: ")).strip().replace(' ', '')
+    password_conf = str(input("Confirme a sua senha: ")
+                        ).strip().replace(' ', '')
     # objeto com dados nova da conta
     return {
         "user": user,
