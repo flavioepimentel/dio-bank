@@ -1,5 +1,5 @@
 from unittest.mock import patch
-from ..view import unlogged_interface, new_user_form, login_form, logged_interface, login_redirect, account_select, extrato_view, withdrawal_form
+from view import unlogged_interface, new_user_form, login_form, logged_interface, login_redirect, account_select, extrato_view, withdrawal_form
 
 
 # @patch('builtins.input', return_value='teste')
@@ -80,8 +80,8 @@ def test_new_user_form(mock_input):
         "password_conf": '1234'
     }
 
-    resultado1 = new_user_form()
-    assert resultado1 == {
+    resultado2 = new_user_form()
+    assert resultado2 == {
         "user": 'JOAO MARIA SILVA SANTOS',
         "cpf": '12345678921',
         "email": 'user@email.com',
@@ -92,8 +92,8 @@ def test_new_user_form(mock_input):
         "password_conf": '1234'
     }
 
-    resultado1 = new_user_form()
-    assert resultado1 == {
+    resultado3 = new_user_form()
+    assert resultado3 == {
         "user": 'JOAO MARIA SILVA SANTOS',
         "cpf": '12345678921',
         "email": 'user@email.com',
