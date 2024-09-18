@@ -65,12 +65,13 @@ def login_form() -> dict:
 Para iniciar a sessão informe:
 
                            
-CPF ou E-mail: """)).lower().strip()
-    password = str(input("Senha: ")).strip()  # verificar se corresponde
+CPF (apenas números) ou E-mail: """)).lower().replace('-', '').replace(' ', '')
+    password = str(input("Senha: ")).replace(
+        ' ', '')  # verificar se corresponde
     return {"cpf": access, "email": access, "password": password}
 
 
-def account_select(accounts: list) -> int:
+def account_select(accounts: list[int]) -> int:
     prompt = '''\n\n\n\n\n\n
 Selecione a conta que você deseja realizar o login: \n    
 
@@ -109,7 +110,7 @@ Saldo: {balance}
 => """).lower().strip()
 
 
-def extrato_view(extrato, balance):
+def extrato_view(extrato: list, balance: float) -> None:
     """
     Organiza dados para apresentar no console como tela
     """
@@ -129,5 +130,15 @@ def extrato_view(extrato, balance):
         print("==========================================")
 
 
-def withdrawal_form() -> float:
-    return float(input("Informe o valor do saque: "))
+# def withdrawal_form() -> float:
+#     return float(str(input("Informe o valor do saque: ")).replace(',', '.'))
+
+def withdrawal_form():
+    user_input = str(input("Informe o valor do saque: "))
+    try:
+        value = float(user_input.replace(',', '.'))
+        if value <= 0:
+            raise ValueError("Valor inválido, deve ser maior que zero.")
+        return value
+    except ValueError:
+        raise ValueError("Entrada inválida, não é um número válido.")
