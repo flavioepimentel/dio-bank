@@ -82,7 +82,12 @@ def check_account_number(account_data: list, account_select):
     if len(account_data) > 1:
         return account_select(account_data)
     elif account_data == []:
-        return 'Error: No accounts found'
+        return '''
+        Error: No accounts found
+        
+        <!> Para corrigit finalize acesse nova conta e finalize o seu cadastro
+
+        '''
     return account_data[0]['account_number']
 
 
