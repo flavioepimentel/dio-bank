@@ -83,6 +83,9 @@ def unlogged_main():
                 user_object["contact_number"], user_object["password"],
                 user_object["birth_date"], user_object["address"], USER_DATA)
 
+            account_create(user_object["user"],
+                           user_object["cpf"], user_object["email"], ACCOUNT_DATA)
+
             form_data = login_form()
 
             if access_validation(
@@ -124,7 +127,7 @@ def unlogged_main():
                         form_data["cpf"], ACCOUNT_DATA, USER_DATA)
 
                     account_create(user_session[0]['user'], user_object['cpf'],
-                                   user_object['email'])
+                                   user_object['email'], ACCOUNT_DATA)
 
                     account_number = check_account_number(
                         user_session[0]['accounts'], account_select)

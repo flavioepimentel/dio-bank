@@ -4,13 +4,12 @@ import datetime
 from connection import write_operation, deserialize
 
 
-def generate_new_account_number() -> int:
+def generate_new_account_number(name_file_json: str) -> int:
     """
     Busca a última conta registrada e devolve um valor 
     válido de número de conta
     """
-    global ACCOUNT_DATA
-    data: list = deserialize(ACCOUNT_DATA)
+    data: list = deserialize(name_file_json)
     last_account: int = 0
     for indicie, valor in enumerate(data):
         if valor["account_number"] > last_account:
@@ -18,8 +17,8 @@ def generate_new_account_number() -> int:
     return last_account + 1
 
 
-def account_create(user: str, cpf: str, email: str) -> None:
-    account_number: int = generate_new_account_number()
+def account_create(user: str, cpf: str, email: str, name_file_json: str) -> None:
+    account_number: int = generate_new_account_number(name_file_json)
     write_operation({
         "timestamp": datetime.datetime.now(),
         "user": user,
@@ -28,7 +27,7 @@ def account_create(user: str, cpf: str, email: str) -> None:
         "account_number": account_number,
         "agencie_number": "0001",
         "balance": 0.0
-    })
+    }, name_file_json)
 
 
 def withdrawal_validation(withdrawal_value: float, balance: float, limite_valor_saque: float, contagem_saques_dia: int, limite_numero_saques: int) -> bool:
@@ -68,7 +67,7 @@ def deposit_operation(*, value: float, account_number: int, cpf: str, email: str
         "value": value,
         "location": "New York"
     }, operation_data, limite_valor_saque, contagem_saques_dia,
-    limite_numero_saques)
+        limite_numero_saques)
 
 
 def withdrawal_operation(*, withdrawal_value: float, balance,

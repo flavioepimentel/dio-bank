@@ -20,14 +20,13 @@ def read_operation(name_file_json: str):
         return "[]"
 
 
-def deserialize(name_file_json) -> list:
+def deserialize(name_file_json: str) -> list:
     """
     Realiza a desserialização do arquivo json com os dados do extrato de string para objeto/dicionário 
     (dict) do Python caso o arquivo seja encontrado em branco, ele devolve uma lista vazia para inicio 
     dos registros do extrato.
     """
     if read_operation(name_file_json) != '':
-        name_file_json = read_operation(name_file_json)
         return json.loads(read_operation(name_file_json))
     return []
 

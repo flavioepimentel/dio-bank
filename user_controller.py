@@ -3,14 +3,21 @@ import datetime
 from connection import write_operation, deserialize
 
 
-def access_validation(cpf: str, email: str, password: str, *user_data) -> bool:
+def access_validation(cpf: str, email: str, password: str, user_data: str) -> bool:
     """
     Retorna um valor booleano para a verificação da existencia das 
     primary key e password
     """
     user_data: list = deserialize(user_data)
-    if password in user_data and (cpf in user_data or email in user_data):
-        return True
+    for i, v in enumerate(user_data):
+        if (
+            password in user_data[i]["password"]
+            and (
+                cpf in user_data[i]["cpf"]
+                or email in user_data[i]["email"]
+            )
+        ):
+            return True
     return False
 
 
@@ -26,12 +33,12 @@ def cpf_validation(cpf: str) -> bool:
     return False
 
 
-def load_user(cpf, ACCOUNT_DATA, USER_DATA):
+def load_user(cpf: str, ACCOUNT_DATA, USER_DATA):
     user_data: list = deserialize(USER_DATA)
     account_data: list = deserialize(ACCOUNT_DATA)
     user_data = [i for i in user_data if i['cpf'] == cpf]
     account_data = [i for i in account_data if i['cpf'] == cpf]
-    user_data['accounts'] = account_data
+    user_data[0]['accounts'] = account_data
     return user_data
 
 
@@ -57,8 +64,9 @@ def new_user_validation(cpf: str, email: str, user_data: str) -> bool:
     se as chaves primárias existirem, não é um novo usuário (false)
     """
     data: list = deserialize(user_data)
-    if cpf not in data and email not in data:
-        return True
+    for i, v in enumerate(data):
+        if cpf not in data[i]["cpf"] and email not in data[i]["email"]:
+            return True
     return False
 
 
