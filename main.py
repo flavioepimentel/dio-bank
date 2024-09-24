@@ -11,7 +11,6 @@ from connection import OPERATION_DATA, ACCOUNT_DATA, USER_DATA
 from user_controller import new_user_validation, user_create, password_validation, access_validation, check_account_number, load_user
 
 
-SALDO_SESSION: float = 0.0
 LIMITE_VALOR_SAQUE: float = 500.0
 LIMITE_NUMERO_SAQUES: int = 3
 STATUS_SESSION = []
@@ -31,7 +30,6 @@ def logged_main(user_session: dict, /,  account_number: int) -> str:
     if opcao == "d":
         valor = float(input("Informe o valor do depósito: "))
         if valor > 0:
-            SALDO_SESSION += valor
             deposit_operation(valor, account_number,
                               user_session['cpf'], user_session['email'], OPERATION_DATA)
         else:
@@ -170,13 +168,16 @@ def unlogged_main():
 
             user_session = load_user(
                 form_data["cpf"], ACCOUNT_DATA, USER_DATA)
-
             account_number = check_account_number(
                 user_session[0]['accounts'], account_select)
 
             STATUS_SESSION.append(user_session[0]['accounts'])
 
             logged_main(user_session[0], account_number)
+
+            print(STATUS_SESSION)
+            print(user_session)
+            print(user_session)
 
     elif opcao == "q":
 

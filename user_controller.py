@@ -1,6 +1,7 @@
 import json
 import datetime
 from connection import write_operation, deserialize
+from account_controller import account_create
 
 
 def access_validation(cpf: str, email: str, password: str, user_data: str) -> bool:
@@ -10,14 +11,15 @@ def access_validation(cpf: str, email: str, password: str, user_data: str) -> bo
     """
     user_data: list = deserialize(user_data)
     for i, v in enumerate(user_data):
-        if (
-            password in user_data[i]["password"]
-            and (
+        if (password in user_data[i]["password"]):
+            print("senha ok")
+
+            if ((
                 cpf in user_data[i]["cpf"]
                 or email in user_data[i]["email"]
             )
-        ):
-            return True
+            ):
+                return True
     return False
 
 
@@ -70,15 +72,18 @@ def new_user_validation(cpf: str, email: str, user_data: str) -> bool:
     return False
 
 
-def check_account_number(account_data, account_select):
+def check_account_number(account_data: list, account_select):
     """
     Função checa a existência de mais de uma conta corrente utilizada
     pelo mesmo usuário.
 
     """
+    print(account_data)
     if len(account_data) > 1:
         return account_select(account_data)
-    return account_data['account_number']
+    elif account_data == []:
+        return 'Error: No accounts found'
+    return account_data[0]['account_number']
 
 
 def user_create(user: str, cpf: str, email: str, contact_number: str,
