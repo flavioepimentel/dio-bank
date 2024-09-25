@@ -1,5 +1,3 @@
-
-import json
 import datetime
 from connection import write_operation, deserialize
 

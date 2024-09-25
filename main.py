@@ -1,14 +1,10 @@
 """
     DIO BANK É UMA APLICAÇÃO QUE TEM O OBJETIVO DE DEMONSTRAR OPERAÇÕES BÁSICAS DE UM APP DE BANCO
 """
-from account_controller import (
-    deposit_operation, load_bank_balance, count_withdrawal_by_date,
-    deserialize, withdrawal_operation, account_create)
-from view import new_user_form, unlogged_interface, logged_interface, login_form, extrato_view, withdrawal_form, login_redirect, account_select
-
 from connection import OPERATION_DATA, ACCOUNT_DATA, USER_DATA
-
+from account_controller import deposit_operation, load_bank_balance, deserialize, withdrawal_operation, account_create
 from user_controller import new_user_validation, user_create, password_validation, access_validation, check_account_number, load_user
+from view import new_user_form, unlogged_interface, logged_interface, login_form, extrato_view, withdrawal_form, login_redirect, account_select
 
 
 STATUS_SESSION = []
