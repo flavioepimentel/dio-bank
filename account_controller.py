@@ -4,6 +4,10 @@ import datetime
 from connection import write_operation, deserialize
 
 
+LIMITE_VALOR_SAQUE: float = 500.0
+LIMITE_NUMERO_SAQUES: int = 3
+
+
 def generate_new_account_number(name_file_json: str) -> int:
     """
     Busca a última conta registrada e devolve um valor 
@@ -30,19 +34,22 @@ def account_create(user: str, cpf: str, email: str, name_file_json: str) -> None
     }, name_file_json)
 
 
-def withdrawal_validation(withdrawal_value: float, balance: float, limite_valor_saque: float, contagem_saques_dia: int, limite_numero_saques: int) -> bool:
-    excedeu_saldo = withdrawal_value > balance
-    excedeu_limite = withdrawal_value > limite_valor_saque
-    excedeu_saques = contagem_saques_dia >= limite_numero_saques
-    if excedeu_saldo:
+def withdrawal_validation(withdrawal_value: float, balance: float, contagem_saques_dia: int) -> bool:
+
+    if withdrawal_value > balance:
         print("\nOperação falhou! Você não tem saldo suficiente.")
         return False
-    elif excedeu_limite:
+    elif withdrawal_value > LIMITE_VALOR_SAQUE:
         print("\nOperação falhou! O valor do saque excede o limite.")
         return False
-    elif excedeu_saques:
-        print("""\nOperação falhou! Você excedeu o número máximo de saques diários. 
-Tente novamente amanhã.""")
+    elif contagem_saques_dia >= LIMITE_NUMERO_SAQUES:
+        print("""\n
+              
+Operação falhou! Você excedeu o número máximo de saques diários.
+               
+Tente novamente amanhã.
+              
+              """)
         print("Saques realizados: ", contagem_saques_dia)
         return False
     elif withdrawal_value > 0:
@@ -53,7 +60,7 @@ Tente novamente amanhã.""")
 
 
 # "2024-09-02 23:00:44.480308"
-def deposit_operation(*, value: float, account_number: int, cpf: str, email: str, operation_data, limite_valor_saque: float, contagem_saques_dia: int, limite_numero_saques: int) -> None:
+def deposit_operation(*, value: float, account_number: int, cpf: str, email: str, name_file_json: str) -> None:
     """
     Realiza a operação de soma na variável global SALDO_SESSION 
     e a escrita da operação no extrato
@@ -66,19 +73,19 @@ def deposit_operation(*, value: float, account_number: int, cpf: str, email: str
         "operation": "Deposito",
         "value": value,
         "location": "New York"
-    }, operation_data, limite_valor_saque, contagem_saques_dia,
-        limite_numero_saques)
+    }, name_file_json)
 
 
-def withdrawal_operation(*, withdrawal_value: float, balance,
-                         account_number, cpf, email) -> None:
+def withdrawal_operation(*, withdrawal_value: float, account_number: int, cpf: str, email: str, name_file_json: str) -> None:
     """
     Realiza a operação de subtração na variável global SALDO_SESSION e 
     a escrita da operação no extrato
     """
-    global SALDO_SESSION, OPERATION_DATA
-    SALDO_SESSION -= withdrawal_value
-    if withdrawal_validation(withdrawal_value, balance):
+    bank_statement: list = deserialize(name_file_json)
+    if withdrawal_validation(
+        withdrawal_value,
+        balance=load_bank_balance(cpf, account_number, bank_statement), contagem_saques_dia=count_withdrawal_by_date(bank_statement)
+    ):
         write_operation({
             "timestamp": datetime.datetime.now(),
             "cpf:": cpf,
@@ -87,10 +94,10 @@ def withdrawal_operation(*, withdrawal_value: float, balance,
             "operation": "Saque",
             "value": withdrawal_value,
             "location": "New York"
-        }, OPERATION_DATA)
+        }, name_file_json)
 
 
-def load_bank_balance(cpf: str, account_number, bank_statement) -> float:
+def load_bank_balance(cpf: str, account_number: int, bank_statement: list) -> float:
     """
     Carrega saldo do usuário, calculando o saldo com base no extrato da conta
     """
@@ -110,11 +117,10 @@ def load_bank_balance(cpf: str, account_number, bank_statement) -> float:
     return saldo
 
 
-def count_withdrawal_by_date() -> int:
+def count_withdrawal_by_date(bank_statement) -> int:
     """
     Realiza a contagem de saques realizados na data atual
     """
-    bank_statement: object | list = deserialize()
     withdrawal: int = 0
     for i, v in enumerate(bank_statement):
         if (bank_statement[i]["operation"] == "Saque") and (

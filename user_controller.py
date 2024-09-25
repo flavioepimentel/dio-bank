@@ -1,7 +1,6 @@
 import json
 import datetime
 from connection import write_operation, deserialize
-from account_controller import account_create
 
 
 def access_validation(cpf: str, email: str, password: str, user_data: str) -> bool:
@@ -35,9 +34,9 @@ def cpf_validation(cpf: str) -> bool:
     return False
 
 
-def load_user(cpf: str, ACCOUNT_DATA, USER_DATA):
-    user_data: list = deserialize(USER_DATA)
-    account_data: list = deserialize(ACCOUNT_DATA)
+def load_user(cpf: str, account_data: str, user_data: str):
+    user_data: list = deserialize(user_data)
+    account_data: list = deserialize(account_data)
     user_data = [i for i in user_data if i['cpf'] == cpf]
     account_data = [i for i in account_data if i['cpf'] == cpf]
     user_data[0]['accounts'] = account_data
@@ -85,7 +84,7 @@ def check_account_number(account_data: list, account_select):
         return '''
         Error: No accounts found
         
-        <!> Para corrigit finalize acesse nova conta e finalize o seu cadastro
+        <!> Para corrigir finalize acesse nova conta e finalize o seu cadastro
 
         '''
     return account_data[0]['account_number']
