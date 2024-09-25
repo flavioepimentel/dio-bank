@@ -1,4 +1,3 @@
-from main import logged_main, unlogged_main, de
 import pytest
 from unittest.mock import patch
 from main import logged_main, unlogged_main

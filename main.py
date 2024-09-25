@@ -11,8 +11,6 @@ from connection import OPERATION_DATA, ACCOUNT_DATA, USER_DATA
 from user_controller import new_user_validation, user_create, password_validation, access_validation, check_account_number, load_user
 
 
-LIMITE_VALOR_SAQUE: float = 500.0
-LIMITE_NUMERO_SAQUES: int = 3
 STATUS_SESSION = []
 
 
@@ -30,20 +28,16 @@ def logged_main(user_session: dict, /,  account_number: int) -> str:
     if opcao == "d":
         valor = float(input("Informe o valor do depósito: "))
         if valor > 0:
-            deposit_operation(valor, account_number,
-                              user_session['cpf'], user_session['email'], OPERATION_DATA)
+            deposit_operation(value=valor, account_number=account_number,
+                              cpf=user_session['cpf'], email=user_session['email'], name_file_json=OPERATION_DATA)
         else:
             print("Operação falhou! O valor informado é inválido.")
 
     elif opcao == "s":
         # Carrega informações da conta
-        bank_statement: list = deserialize(OPERATION_DATA)
-        balance = load_bank_balance(
-            user_session['cpf'], account_number, bank_statement)
-        CONTAGEM_SAQUES_DIA = count_withdrawal_by_date()
         withdrawal_value = withdrawal_form()
-        withdrawal_operation(withdrawal_value, balance, account_number,
-                             user_session['cpf'], user_session['email'], LIMITE_VALOR_SAQUE, CONTAGEM_SAQUES_DIA, LIMITE_NUMERO_SAQUES)
+        withdrawal_operation(withdrawal_value=withdrawal_value, account_number=account_number,
+                             cpf=user_session['cpf'], email=user_session['email'], name_file_json=OPERATION_DATA)
 
     elif opcao == "e":
         bank_statement: list = deserialize(OPERATION_DATA)
@@ -129,8 +123,8 @@ def unlogged_main():
 
                     account_number = check_account_number(
                         user_session[0]['accounts'], account_select)
-
-                    STATUS_SESSION.append(user_session[0]['accounts'])
+                    if STATUS_SESSION == []:
+                        STATUS_SESSION.append(user_session[0])
 
                     logged_main(user_session[0], account_number)
 
@@ -151,7 +145,8 @@ def unlogged_main():
                     account_number = check_account_number(
                         user_session[0]['accounts'], account_select)
 
-                    STATUS_SESSION.append(user_session[0]['accounts'])
+                    if STATUS_SESSION == []:
+                        STATUS_SESSION.append(user_session[0])
 
                     logged_main(user_session[0], account_number)
 
@@ -171,13 +166,10 @@ def unlogged_main():
             account_number = check_account_number(
                 user_session[0]['accounts'], account_select)
 
-            STATUS_SESSION.append(user_session[0]['accounts'])
+            if STATUS_SESSION == []:
+                STATUS_SESSION.append(user_session[0])
 
             logged_main(user_session[0], account_number)
-
-            print(STATUS_SESSION)
-            print(user_session)
-            print(user_session)
 
     elif opcao == "q":
 
@@ -190,7 +182,8 @@ if __name__ == '__main__':
             if unlogged_main() == 'break':
                 break
         elif STATUS_SESSION != []:
-            if logged_main() == 'break':
+            print(STATUS_SESSION)
+            if logged_main(STATUS_SESSION[0], STATUS_SESSION[0]["accounts"][0]['account_number']) == 'break':
                 break
         else:
             STATUS_SESSION = []
